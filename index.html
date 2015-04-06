@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<title>Baidu Map Demo</title>
+<style type="text/css">
+html, body, #map-canvas {
+		height: 100%;
+		margin: 0px;
+		padding: 0px
+}
+</style>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=NkArbcs6kW74wrlpZcTNHU2g"></script>
+</head>
+<script>
+
+var init = function(){
+
+	//step1: create panorama
+	var panorama = new BMap.Panorama('panorama');
+	panorama.setPosition(new BMap.Point(116.321463, 39.984738));
+	panorama.setPov({pitch: 6, heading: 138});
+	panorama.setPanoramaPOIType(BMAP_PANORAMA_POI_HOTEL);
+	panorama.setOptions({ 
+		'disableIndoorSceneSwitchControl': true
+	});
+	
+	//step2: panoramaService
+	var panoramaService = new BMap.PanoramaService();
+	panoramaService.getPanoramaByLocation(panorama.getPosition(), function(data){
+		document.getElementById('panoCell').innerHTML= data.id;
+		document.getElementById('roadCell').innerHTML= data.description;
+	});
+	
+	//step3: add listeners
+	panorama.addEventListener('position_changed', function(e){ 
+		var positionCell = document.getElementById('positionCell');
+		positionCell.innerHTML = panorama.getPosition().lng+","+panorama.getPosition().lat;
+	
+		panorama.addOverlay(label);
+		panorama.setPov(label.getPov());		
+	});
+	
+	panorama.addEventListener('pov_changed', function(e){ 
+		var headingCell = document.getElementById('headingCell');
+		var pitchCell = document.getElementById('pitchCell');
+		headingCell.firstChild.nodeValue = panorama.getPov().heading + '';
+		pitchCell.firstChild.nodeValue = panorama.getPov().pitch + '';
+	});
+	
+	//step4: change labels
+	var changePoi = document.getElementById("setPanoramaPOIType");
+	changePoi.onchange = function(){
+		var selectValue = this.value;
+		switch(selectValue) {
+		  case '1': 
+			panorama.setPanoramaPOIType(BMAP_PANORAMA_POI_HOTEL); 
+			panorama.setPov({pitch: 6, heading: 138}); 
+			break;
+		  case '2': 
+			panorama.setPanoramaPOIType(BMAP_PANORAMA_POI_CATERING); 
+			panorama.setPov({pitch: 6, heading: 138});
+			break;
+		  case '3': 
+			panorama.setPanoramaPOIType(BMAP_PANORAMA_POI_MOVIE); 
+			panorama.setPov({pitch: 6, heading: 138});
+			break;
+		  case '4': 
+			panorama.setPanoramaPOIType(BMAP_PANORAMA_POI_TRANSIT); 
+			break;
+		  case '5': 
+			panorama.setPanoramaPOIType(BMAP_PANORAMA_POI_INDOOR_SCENE); 
+			panorama.setPov({
+			  pitch: 18.960000000000015, 
+			  heading: 350.16741512558605
+			}); 
+			break;
+		  default:
+		} 	
+	};
+};
+
+window.onload = init;
+</script>
+
+<body>	
+<div id="panorama" style="width: 60%; height: 100%;float:left"></div>
+<div>
+	<select id="setPanoramaPOIType" tyle="width: 40%; height: 100%;float:left" onchange="text(this.id)">
+		<option value="1">HOTEL</option>
+		<option value="2">CATERING</option>
+		<option value="3">MOVIE</option>
+		<option value="4">TRANSIT</option>
+		<option value="5">INDOOR_SCENE</option>
+	</select>
+</div>
+<div id="panoInfo" style="width: 40%; height: 100%;float:left">
+    <table>
+	<tr>
+<td><b>Position</b></td><td id="positionCell">&nbsp;</td>
+      </tr>
+      <tr>
+<td><b>Heading</b></td><td id="headingCell">hdg</td>
+      </tr>
+      <tr>
+<td><b>Pitch</b></td><td id="pitchCell">pit</td>
+      </tr>
+      <tr>
+<td><b>Pano ID</b></td><td id="panoCell">&nbsp;</td>
+      </tr>
+      <tr>
+<td><b>Road Name</b></td><td id="roadCell">&nbsp;</td>
+      </tr>
+     <table id="labels_table"></table>
+</table>
+</div>
+</body>
+</html>
